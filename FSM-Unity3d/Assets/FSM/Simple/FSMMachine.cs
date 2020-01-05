@@ -1,57 +1,78 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 
 namespace CLToolKits.FSM.Simple
 {
-	public class FSMMachine  
+	public class FSMMachine<T>
 	{
-		bool running = false;
-		List<Status> statuses = new List<Status>();
-		public Status DefaultStatus{get;private set;}
-		public Status CurrentStatus{get;private set;}
+		private string fsmName;
+		private bool running = false;
+		Dictionary<T,StateBehaviour> stateBehaviourDic = new Dictionary<T, StateBehaviour>();
+		public T DefaultState{get; set;} = default(T);
+		private T currentState;
+		public T CurrentState
+		{
+			get
+			{
+				return currentState;
+			} 
+			set
+			{
+				ChangeStatus(value);
+			}
+		}
 
 		//构造函数中添加默认状态
-		public FSMMachine(Status defaultStatus)
+		public FSMMachine(string fsmName)
 		{
-			DefaultStatus = defaultStatus;
-			AddStatus(defaultStatus);
+			this.fsmName = fsmName;
 		}
 
 		//添加状态
-		public void AddStatus(Status status)
+		public void AddStatus(T state,StateBehaviour stateBehaviour)
 		{
-			if(statuses.Contains(status))
-			return;
-
-			statuses.Add(status);
+			stateBehaviourDic[state] = stateBehaviour;
 		}
 
 		//移除状态
-		public void RemoveStatus(Status status)
+		public void RemoveStatus(T state)
 		{
-			if(!statuses.Contains(status))
-			return;
+			if(!stateBehaviourDic.ContainsKey(state))
+				return;
 
-			statuses.Remove(status);
+			stateBehaviourDic.Remove(state);
+		}
+
+		//改变状态
+		public void ChangeStatus(T state)
+		{
+			if(!stateBehaviourDic.ContainsKey(state)||stateBehaviourDic[state] == null)
+				throw new InvalidOperationException(string.Format("[FSM {0}] : Can't call 'ChangeStatus' before the stateBehaviour of state has been settled.",fsmName));
+
+			stateBehaviourDic[currentState].OnLeave();
+			stateBehaviourDic[state].OnEnter();
+			currentState = state;
 		}
 
 		public void Run()
 		{
+
+			if(!stateBehaviourDic.ContainsKey(DefaultState)||stateBehaviourDic[DefaultState] == null)
+				throw new InvalidOperationException(string.Format("[FSM {0}] : Can't call 'ChangeStatus' before the stateBehaviour of state has been settled.",fsmName));
+
+			stateBehaviourDic[DefaultState].OnEnter();
+			currentState = DefaultState;
 			running = true;
-			CurrentStatus = DefaultStatus;
-			CurrentStatus.OnEnter();
 		}
 
-		//改变状态
-		public void ChangeStatus(Status status)
+		public void Stop()
 		{
-			if(!statuses.Contains(status)||!!running)
-			return;
-			if(CurrentStatus!=null)
-				CurrentStatus.OnLeave();
 
-			status.OnEnter();
-			CurrentStatus = status;
+			if(!stateBehaviourDic.ContainsKey(currentState)||stateBehaviourDic[currentState] == null)
+				throw new InvalidOperationException(string.Format("[FSM {0}] : Can't call 'ChangeStatus' before the stateBehaviour of state has been settled.",fsmName));
+
+			stateBehaviourDic[currentState].OnLeave();
+			running = false;
 		}
 	}
 }

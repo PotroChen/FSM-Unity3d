@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CLToolKits.FSM.Simple
 {
-	public class Status 
+	public class StateBehaviour 
 	{
 		public virtual void OnEnter()
 		{
