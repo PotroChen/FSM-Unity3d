@@ -26,6 +26,14 @@ namespace CLToolKits.FSM.Simple.Example
 			StartCoroutine(ChangeState());
 		}
 
+		void Update()
+		{
+			if(fSMMachine!=null&&fSMMachine.Running)
+			{
+				fSMMachine.Process();
+			}
+		}
+
 		IEnumerator ChangeState()
 		{
 			yield return new WaitForSeconds(2f);

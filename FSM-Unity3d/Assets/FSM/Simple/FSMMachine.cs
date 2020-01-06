@@ -6,7 +6,7 @@ namespace CLToolKits.FSM.Simple
 	public class FSMMachine<T>
 	{
 		private string fsmName;
-		private bool running = false;
+		public bool Running {get;private set;}
 		Dictionary<T,StateBehaviour> stateBehaviourDic = new Dictionary<T, StateBehaviour>();
 		public T DefaultState{get; set;} = default(T);
 		private T currentState;
@@ -62,7 +62,7 @@ namespace CLToolKits.FSM.Simple
 
 			stateBehaviourDic[DefaultState].OnEnter();
 			currentState = DefaultState;
-			running = true;
+			Running = true;
 		}
 
 		public void Stop()
@@ -72,7 +72,18 @@ namespace CLToolKits.FSM.Simple
 				throw new InvalidOperationException(string.Format("[FSM {0}] : Can't call 'ChangeStatus' before the stateBehaviour of state has been settled.",fsmName));
 
 			stateBehaviourDic[currentState].OnLeave();
-			running = false;
+			Running = false;
+		}
+
+		public void Process()
+		{
+			if(!stateBehaviourDic.ContainsKey(currentState)||stateBehaviourDic[currentState] == null)
+				throw new InvalidOperationException(string.Format("[FSM {0}] : Can't call 'ChangeStatus' before the stateBehaviour of state has been settled.",fsmName));
+
+			if(!Running)
+				return;
+				
+			stateBehaviourDic[currentState].OnProcess();
 		}
 	}
 }

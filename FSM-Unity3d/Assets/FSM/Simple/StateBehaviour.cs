@@ -13,5 +13,11 @@ namespace CLToolKits.FSM.Simple
 		public virtual void OnLeave()
 		{
 		}
+
+
+		public virtual void OnProcess()
+		{
+			
+		}
 	}
 }
