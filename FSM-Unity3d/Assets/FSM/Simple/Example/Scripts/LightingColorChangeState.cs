@@ -3,27 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using CLToolKits.FSM.Simple;
 
-public class LightingColorChangeState : StateBehaviour {
-
-	private Color targetColor;
-	private Color oriColor;
-	private Light light;
-	public LightingColorChangeState(Color TargetColor)
+namespace CLToolKits.FSM.Simple.Example
+{
+	public class LightingColorChangeState : StateBehaviour 
 	{
-		targetColor = TargetColor;
-	}
 
-	public override void OnEnter()
-	{
-		base.OnEnter();
-		light = GameObject.FindObjectOfType<Light>();
-		oriColor = light.color;//记录原来的颜色
-		light.color = targetColor;
-	}
+		private Color targetColor;
+		private Color oriColor;
+		private Light light;
+		public LightingColorChangeState(Color TargetColor)
+		{
+			targetColor = TargetColor;
+		}
 
-	public override void OnLeave()
-	{
-		base.OnEnter();
-		light.color = targetColor;//恢复颜色
+		public override void OnEnter()
+		{
+			base.OnEnter();
+			light = GameObject.FindObjectOfType<Light>();
+			oriColor = light.color;//记录原来的颜色
+			light.color = targetColor;
+		}
+
+		public override void OnLeave()
+		{
+			base.OnEnter();
+			light.color = targetColor;//恢复颜色
+		}
 	}
 }
