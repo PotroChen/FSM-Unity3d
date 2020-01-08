@@ -38,7 +38,7 @@ namespace CLToolKits.FSM
         /// </summary>
         /// <param name="tag">状态的tag值</param>
         /// <returns>有这个Tag的状态</returns>
-        IState GetStateWithTag(string tag);
+        List<IState> GetStatesWithTag(string tag);
     }
 }
 

@@ -6,11 +6,18 @@ public class LightController : MonoBehaviour
 {
     public float MaxIntensity = 1f;
     public float fadeSpeed= 1f;
+    public bool isChangeColor;
     private FSMMachine lightFSM;
-    private State open;
+    private FSMMachine open;
     private State close;
     private Transition open2Close;
     private Transition close2Open;
+    private State changeIntensity;
+    private State changeColor;
+
+    private Transition color2Intensity;
+    private Transition intensity2color;
+
 
     private Light myLight;
     private bool isOpen = true;
@@ -18,6 +25,10 @@ public class LightController : MonoBehaviour
     private bool isAnimation;
     private bool isReset;
     private float target;
+    private Color startColor;
+    private Color targetColor;
+    private float colorTimer;
+    
     //------End----
     // Start is called before the first frame update
     void Start()
@@ -50,11 +61,12 @@ public class LightController : MonoBehaviour
     /// </summary>
     private void InitFSM()
     {
-        open = new State("Open");
-        open.OnEnter +=(IState state)=>{
-            myLight.intensity = MaxIntensity;
+        changeIntensity = new State("ChangeIntensity");
+        changeIntensity.OnEnter+=(IState state)=>{
+            isReset = true;
+            isAnimation = true;
         };
-        open.OnUpdate +=(float f)=>{
+        changeIntensity.OnUpdate +=(float f)=>{
             if(isAnimation)
             {
                 if(isReset)
@@ -78,6 +90,53 @@ public class LightController : MonoBehaviour
             }
         };
 
+        changeColor = new State("ChangeColor");
+        changeColor.OnEnter+=(IState state)=>{
+            isAnimation = false;
+        };
+        changeColor.OnUpdate+=(float f)=>{
+            if(isAnimation)
+            {
+                if( colorTimer>=1f)
+                {
+                    isAnimation = false;
+                }
+                else
+                {
+                    colorTimer+=Time.deltaTime*1f;
+                    myLight.color=Color.Lerp(startColor,targetColor,colorTimer);
+                }
+            }
+            else
+            {
+                float r = Random.Range(0f,1f);
+                float g = Random.Range(0f,1f);
+                float b = Random.Range(0f,1f);
+                targetColor = new Color(r,g,b);
+                startColor = myLight.color;
+                colorTimer = 0f;
+                isAnimation = true;
+            }
+        };
+        
+        color2Intensity = new Transition(changeColor,changeIntensity);
+        color2Intensity.OnCheck+=()=>{
+            return !isChangeColor;
+        };
+        changeColor.AddTransition(color2Intensity);
+
+        intensity2color = new Transition(changeIntensity,changeColor);
+        intensity2color.OnCheck+=()=>{
+            return isChangeColor;
+        };
+        changeIntensity.AddTransition(intensity2color);
+
+        open = new FSMMachine("Open",changeIntensity);
+        open.AddState(changeColor);
+
+        open.OnEnter +=(IState state)=>{
+            myLight.intensity = MaxIntensity;
+        };
         close = new State("Close");
         close.OnEnter +=(IState state)=>{
             myLight.intensity = 0f;

@@ -89,9 +89,16 @@ namespace CLToolKits.FSM
         /// <param name="tag">状态的tag值</param>
         /// <returns>有这个Tag的状态</returns>
         /// TODO 待补齐
-        public IState GetStateWithTag(string tag)
+        public List<IState> GetStatesWithTag(string tag)
         {
-            return null;
+            List<IState> rtn = new List<IState>();
+            foreach(var state in states)
+            {
+                if(state.Tag == tag)
+                    rtn.Add(state);
+            }
+            
+            return rtn.Count>0?rtn:null;
         }
 
         public override void UpdateCallback(float deltaTime)
