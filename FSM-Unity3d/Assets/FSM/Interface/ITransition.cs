@@ -19,7 +19,7 @@ namespace CLToolKits.FSM
         IState To{get;set;}
 
         /// <summary>
-        /// Callback,invoked when translating
+        /// Chenck If Transition Complete
         /// </summary>
         /// <returns>是否过渡结束</returns>
         bool TransitionCallback();
